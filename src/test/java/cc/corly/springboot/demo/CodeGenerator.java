@@ -21,7 +21,7 @@ public class CodeGenerator {
         System.out.println(userDir);
     }
 
-    @Test
+    // @Test
     public void generateCode() {
         String userDir = System.getProperty("user.dir") + "/src/main/java";
         String packageName = "cc.corly.springboot.demo";

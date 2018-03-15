@@ -3,56 +3,62 @@ package cc.corly.springboot.demo.config;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.AbstractRequestLoggingFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
-public class HttpLogFilter implements Filter {
+public class HttpLogFilter extends AbstractRequestLoggingFilter {
     private static final Logger log = LoggerFactory.getLogger(HttpLogFilter.class);
-    private int maxPayloadLength = 1000;
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
 
-    }
+    public static final String TRACE_KEY = "traceId";
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        MDC.put(TRACE_KEY, UUID.randomUUID().toString());
+        ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+        super.doFilterInternal(request, responseWrapper, filterChain);
         if (log.isInfoEnabled()) {
-            StringBuffer sb = new StringBuffer("RequestLog:");
-            sb.append(httpServletRequest.getMethod()).append(",");
-            sb.append(httpServletRequest.getRequestURL());
-            String queryStr = httpServletRequest.getQueryString();
-            if (StringUtils.isNotBlank(queryStr)) {
-                sb.append("?").append(queryStr);
-            }
-            request.getInputStream();
-            ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(httpServletRequest);
-            String body = requestWrapper.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-//            String body = getContentAsString(requestWrapper.getContentAsByteArray(), maxPayloadLength, request.getCharacterEncoding());
-            if (StringUtils.isNotBlank(body)) {
-                sb.append(", body=").append(body);
-            }
-            log.info(sb.toString());
-            chain.doFilter(request, response);
+            String respBody = getContentAsString(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8.name());
+            log.info("uri={};ResponseBody={}", request.getRequestURI(), respBody);
+            responseWrapper.copyBodyToResponse();
         }
-
+        MDC.remove(TRACE_KEY);
     }
+
 
     @Override
-    public void destroy() {
-
+    protected void beforeRequest(HttpServletRequest request, String message) {
+        if (log.isInfoEnabled()) {
+            log.info(message);
+        }
     }
 
-    private String getContentAsString(byte[] buf, int maxLength, String charsetName) {
-        if (buf == null || buf.length == 0) return "";
-        int length = Math.min(buf.length, this.maxPayloadLength);
+
+    @Override
+    protected void afterRequest(HttpServletRequest request, String message) {
+        if (log.isInfoEnabled()) {
+            log.info(message);
+        }
+    }
+
+    private String getContentAsString(byte[] buf, String charsetName) {
+        if (buf == null || buf.length == 0) {
+            return "";
+        }
+        int length = Math.min(buf.length, getMaxPayloadLength());
         try {
             return new String(buf, 0, length, charsetName);
         } catch (UnsupportedEncodingException ex) {

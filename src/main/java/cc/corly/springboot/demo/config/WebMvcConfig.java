@@ -41,8 +41,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class WebMvcConfig implements WebMvcConfigurer {
     private static final Logger log = LoggerFactory.getLogger(WebMvcConfig.class);
 
-    @Resource
-    private RequestResponseLogInterceptor requestResponseLogInterceptor;
 
     //使用阿里 FastJson 作为JSON MessageConverter
     @Override
@@ -93,21 +91,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
         });
     }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(requestResponseLogInterceptor);
-    }
-    @Resource
-    private HttpLogInterceptor httpLogInterceptor;
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor(requestResponseLogInterceptor);
+//    }
 
-    @Bean
-    public RestTemplate restTemplate() {
-        RestTemplate restTemplate = new RestTemplate();
-        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(1);
-        interceptors.add(httpLogInterceptor);
-        restTemplate.setInterceptors(interceptors);
-        return restTemplate;
-    }
     @Resource
     private HttpLogFilter httpLogFilter;
 
@@ -115,6 +103,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public FilterRegistrationBean someFilterRegistration() {
 
         FilterRegistrationBean registration = new FilterRegistrationBean();
+        httpLogFilter.setIncludeQueryString(true);
+        httpLogFilter.setIncludeClientInfo(true);
+        httpLogFilter.setMaxPayloadLength(1000);
+        httpLogFilter.setIncludePayload(true);
         registration.setFilter(httpLogFilter);
         registration.addUrlPatterns("/*");
 //        registration.addInitParameter("paramName", "paramValue");
