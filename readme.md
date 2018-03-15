@@ -3,6 +3,8 @@
 
 Spring Boot API sedd 是一个基于 Spring Boot & Mybatis Plus 的种子项目
 
+线上建议使用-Dlog4j.configurationFile=log4j2-product.xml 指定log4j2 的配置
+
 ## 特征
 
 1. 统一异常处理
