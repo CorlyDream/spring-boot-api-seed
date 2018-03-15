@@ -95,17 +95,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
         });
     }
 
-    @Resource
-    private HttpLogFilter httpLogFilter;
-
     @Bean
     public FilterRegistrationBean someFilterRegistration() {
-
-        FilterRegistrationBean registration = new FilterRegistrationBean();
+        HttpLogFilter httpLogFilter = new HttpLogFilter();
         httpLogFilter.setIncludeQueryString(true);
         httpLogFilter.setIncludeClientInfo(true);
         httpLogFilter.setMaxPayloadLength(1000);
         httpLogFilter.setIncludePayload(true);
+        httpLogFilter.setIncludeResponseBody(false);
+        FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(httpLogFilter);
         registration.addUrlPatterns("/*");
         registration.setName("httpLogFilter");

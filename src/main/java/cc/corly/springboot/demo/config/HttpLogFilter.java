@@ -24,13 +24,19 @@ public class HttpLogFilter extends AbstractRequestLoggingFilter {
 
     public static final String TRACE_KEY = "traceId";
 
+    private boolean includeResponseBody = false;
+
+    public void setIncludeResponseBody(boolean includeResponseBody) {
+        this.includeResponseBody = includeResponseBody;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         MDC.put(TRACE_KEY, UUID.randomUUID().toString());
         ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
         super.doFilterInternal(request, responseWrapper, filterChain);
-        if (log.isInfoEnabled()) {
+        if (includeResponseBody && log.isInfoEnabled()) {
             String respBody = getContentAsString(responseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8.name());
             log.info("uri={};ResponseBody={}", request.getRequestURI(), respBody);
             responseWrapper.copyBodyToResponse();
