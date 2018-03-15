@@ -1,21 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="debug" monitorInterval="30" shutdownHook="disable">
     <properties>
-        <property name="LOG_HOME">/data1/logs/broker-video</property>
-        <property name="JOB_NAME">noname</property>
+        <property name="LOG_HOME">/data1/logs</property>
+        <property name="JOB_NAME">spring-boot-api-seed</property>
     </properties>
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%date{yyyy-MM-dd HH:mm:ss} [%t] %level [%logger{36}][%file:%line] %msg%n%throwable"/>
-        </Console>
 
-        <!--每天一个文件-->
         <RollingRandomAccessFile name="DetailFile"
                                  fileName="${sys:LOG_HOME}/${sys:JOB_NAME}/detail.log" bufferedIO="false"
                                  filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/detail.%d{yyyy-MM-dd}-%i.log">
-
             <PatternLayout
-                    pattern="%date{yyyy-MM-dd HH:mm:ss} [%t] %level [%file:%line] %msg%n%throwable"/>
+                    pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] %-5level [%c{3}][%file:%line] %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="500 MB"/>
+            </Policies>
+        </RollingRandomAccessFile>
+        <RollingRandomAccessFile name="APIFile"
+                                 fileName="${sys:LOG_HOME}/${sys:JOB_NAME}/api.log" bufferedIO="false"
+                                 filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/api.%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout
+                    pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] %-5level [%c{3}][%file:%line] %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="500 MB"/>
+            </Policies>
+        </RollingRandomAccessFile>
+        <RollingRandomAccessFile name="SQLFile"
+                                 fileName="${sys:LOG_HOME}/${sys:JOB_NAME}/sql.log" bufferedIO="false"
+                                 filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/sql.%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout
+                    pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] %-5level [%c{3}][%file:%line] %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
                 <SizeBasedTriggeringPolicy size="500 MB"/>
@@ -26,7 +41,7 @@
                                  filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/error.%d{yyyy-MM-dd}.log">
 
             <PatternLayout
-                    pattern="%date{yyyy-MM-dd HH:mm:ss} [%t] %level [%logger{36}:%line] %msg%n%throwable"/>
+                    pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] %-5level [%c{3}][%file:%line] %msg%n%throwable"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
@@ -37,8 +52,11 @@
             <AppenderRef ref="DetailFile"/>
             <AppenderRef level="error" ref="error"/>
         </Root>
-        <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="DEBUG" additivity="false">
-            <AppenderRef ref="DetailFile"></AppenderRef>
+        <logger name="cc.corly.springboot.demo.config.HttpLogFilter" level="INFO" additivity="false">
+            <AppenderRef ref="APIFile"></AppenderRef>
+        </logger>
+        <logger name="com.baomidou.mybatisplus.plugins.PerformanceInterceptor" level="INFO" additivity="false">
+            <AppenderRef ref="SQLFile"></AppenderRef>
         </logger>
     </Loggers>
 </Configuration>

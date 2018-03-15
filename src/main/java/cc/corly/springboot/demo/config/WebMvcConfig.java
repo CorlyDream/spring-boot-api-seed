@@ -62,14 +62,18 @@ public class WebMvcConfig implements WebMvcConfigurer {
         exceptionResolvers.add(new HandlerExceptionResolver() {
             public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception e) {
                 Result result = new Result();
+                int httpStatusCode = 200;
                 if (e instanceof ServiceException) {//业务失败的异常，如“账号或密码错误”
                     result.setCode(ResultCode.FAIL).setMessage(e.getMessage());
                     log.info(e.getMessage());
                 } else if (e instanceof NoHandlerFoundException) {
                     result.setCode(ResultCode.NOT_FOUND).setMessage("接口 [" + request.getRequestURI() + "] 不存在");
+                    httpStatusCode = 404;
                 } else if (e instanceof ServletException) {
                     result.setCode(ResultCode.FAIL).setMessage(e.getMessage());
+                    httpStatusCode = 400;
                 } else {
+                    httpStatusCode = 500;
                     result.setCode(ResultCode.INTERNAL_SERVER_ERROR).setMessage("接口 [" + request.getRequestURI() + "] 内部错误，请联系管理员");
                     String message;
                     if (handler instanceof HandlerMethod) {
@@ -84,17 +88,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
                     }
                     log.error(message, e);
                 }
-                responseResult(response, result);
+                responseResult(response, result, httpStatusCode);
                 return new ModelAndView();
             }
 
         });
     }
-
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(requestResponseLogInterceptor);
-//    }
 
     @Resource
     private HttpLogFilter httpLogFilter;
@@ -109,16 +108,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
         httpLogFilter.setIncludePayload(true);
         registration.setFilter(httpLogFilter);
         registration.addUrlPatterns("/*");
-//        registration.addInitParameter("paramName", "paramValue");
         registration.setName("httpLogFilter");
         registration.setOrder(1);
         return registration;
     }
 
-    private void responseResult(HttpServletResponse response, Result result) {
+    private void responseResult(HttpServletResponse response, Result result, int httpStatusCode) {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Content-type", "application/json;charset=UTF-8");
-        response.setStatus(200);
+        response.setStatus(httpStatusCode);
         try {
             response.getWriter().write(JSON.toJSONString(result));
         } catch (IOException ex) {
