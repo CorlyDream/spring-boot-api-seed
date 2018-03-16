@@ -8,38 +8,34 @@
 
         <RollingRandomAccessFile name="DetailFile"
                                  fileName="${sys:LOG_HOME}/${sys:JOB_NAME}/detail.log" bufferedIO="false"
-                                 filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/detail.%d{yyyy-MM-dd}-%i.log">
+                                 filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/detail.%d{yyyy-MM-dd}.log">
             <PatternLayout
                     pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] %-5level [%c{3}][%file:%line] %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="500 MB"/>
             </Policies>
         </RollingRandomAccessFile>
         <RollingRandomAccessFile name="APIFile"
                                  fileName="${sys:LOG_HOME}/${sys:JOB_NAME}/api.log" bufferedIO="false"
-                                 filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/api.%d{yyyy-MM-dd}-%i.log">
+                                 filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/api.%d{yyyy-MM-dd}.log">
             <PatternLayout
                     pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] %-5level [%c{3}][%file:%line] %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="500 MB"/>
             </Policies>
         </RollingRandomAccessFile>
         <RollingRandomAccessFile name="SQLFile"
                                  fileName="${sys:LOG_HOME}/${sys:JOB_NAME}/sql.log" bufferedIO="false"
-                                 filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/sql.%d{yyyy-MM-dd}-%i.log">
+                                 filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/sql.%d{yyyy-MM-dd}.log">
             <PatternLayout
                     pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] %-5level [%c{3}][%file:%line] %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="500 MB"/>
             </Policies>
         </RollingRandomAccessFile>
         <RollingRandomAccessFile name="error"
                                  fileName="${sys:LOG_HOME}/${sys:JOB_NAME}/error.log" bufferedIO="true"
                                  filePattern="${sys:LOG_HOME}/${sys:JOB_NAME}/error.%d{yyyy-MM-dd}.log">
-
             <PatternLayout
                     pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] %-5level [%c{3}][%file:%line] %msg%n%throwable"/>
             <Policies>
