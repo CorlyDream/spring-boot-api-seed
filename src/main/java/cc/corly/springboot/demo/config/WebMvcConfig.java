@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -102,10 +103,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
         httpLogFilter.setIncludeClientInfo(true);
         httpLogFilter.setMaxPayloadLength(1000);
         httpLogFilter.setIncludePayload(true);
-        httpLogFilter.setIncludeResponseBody(false);
+        httpLogFilter.setIncludeResponseBody(true);
+        httpLogFilter.addExcludeUri("/user/list");
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(httpLogFilter);
-        registration.addUrlPatterns("/*");
         registration.setName("httpLogFilter");
         registration.setOrder(1);
         return registration;

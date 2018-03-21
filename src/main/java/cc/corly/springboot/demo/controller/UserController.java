@@ -5,6 +5,7 @@ import cc.corly.springboot.demo.entity.User;
 import cc.corly.springboot.demo.service.IUserService;
 import cc.corly.springboot.demo.util.Result;
 import cc.corly.springboot.demo.util.ResultGenerator;
+import cc.corly.springboot.demo.util.ServiceException;
 import com.baomidou.mybatisplus.plugins.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,11 @@ public class UserController {
         log.info("test add user");
         userService.insert(user);
         return ResultGenerator.genSuccessResult(user.getTestId());
+    }
+
+    @GetMapping("except")
+    public Result test() {
+        throw new IllegalArgumentException("test");
     }
 }
 
